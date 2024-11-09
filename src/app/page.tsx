@@ -1,101 +1,129 @@
-import Image from "next/image";
+"use client";
+
+import {height, width} from "@/shared/constants/dimensions";
+import {useEffect, useMemo, useRef} from "react";
+import {config} from "@/shared/constants/config";
+import {Context, RawData} from "@/shared/types/types";
+
+import {drawAxes} from "@/utils/draw-axes";
+import {findMaxCoordinateValue} from "@/utils/find-max-coordinate-value";
+
+
+const rawData: RawData = [
+    [
+        {x: 0, y: 100},
+        {x: 50, y: 400},
+        {x: 100, y: 100},
+        {x: 150, y: 540},
+        {x: 200, y: 300},
+    ],
+    [
+        {x: 0, y: 100},
+        {x: 50, y: 400},
+        {x: 100, y: 100},
+        {x: 150, y: 540},
+        {x: 300, y: 300},
+    ],
+]
+
+function calculateLineProperties(x1: number, y1: number, x2: number, y2: number, width: number, height: number, sizeOfTheDot: number) {
+    x1 = x1 * width / 100;
+    y1 = y1 * height / 100;
+    x2 = x2 * width / 100;
+    y2 = y2 * height / 100;
+
+    const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+    const angleRadians = Math.atan2(y2 - y1, x2 - x1);
+
+    const angleDegrees = angleRadians * (180 / Math.PI);
+
+    return {
+        width: distance - sizeOfTheDot + 'px',
+        transform: `rotate(${angleDegrees}deg)`,
+    };
+}
+
+const render = (ctx: Context, data: RawData) => {
+    ctx.clearRect(0, 0, width, height);
+
+    drawAxes(
+        ctx,
+        150,
+        width - 150,
+        1,
+        4,
+        'time',
+        150,
+        height - 150,
+        10,
+        "your mom's weight(lbs)",
+        data
+    )
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const {maxX, maxY} = useMemo(() => findMaxCoordinateValue(rawData), [rawData]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    useEffect(() => {
+        const context = canvasRef?.current?.getContext("2d");
+
+        const dpi = window.devicePixelRatio;
+
+        config.POINT_SIZE_HOVERED *= dpi
+        config.POINT_SIZE_NORMAL *= dpi
+        config.STROKE_SIZE_HOVERED *= dpi
+        config.STROKE_SIZE_NORMAL *= dpi
+        config.TEXT_SIZE *= dpi
+
+        //const data = transformData(rawData, 150, 150, width - 300, height - 300);
+
+        render(context as CanvasRenderingContext2D, rawData);
+    }, [canvasRef]);
+
+
+    return (
+        <div className="flex items-center justify-center relative">
+            <div className={`w-[${width}px] h-[${height}px] mx-auto relative`}>
+                <canvas ref={canvasRef} width={width} height={height}></canvas>
+                {rawData.map((line, j) => (
+                    <div
+                        key={j}
+                        className={`absolute top-[150px] left-[150px] mx-auto`}
+                        style={{width: width - 300, height: height - 300}}
+                    >
+                        {line.map((point, i: number) => (<>
+                                    <div
+                                        className="absolute w-[20px] h-[20px] bg-black rounded-full"
+                                        id={`point-${j}-${i}`}
+                                        style={{
+                                            bottom: `calc(${point.y / maxY * 100}% - 10px)`,
+                                            left: `calc(${point.x / maxX * 100}% - 10px)`,
+                                        }}
+                                        key={point.x}>{point.x}, {point.y}</div>
+                                    {line[i + 1] && (<div
+                                        className="absolute"
+                                        style={{
+                                            bottom: `calc(${point.y / maxY * 100}% - 10px)`,
+                                            left: `calc(${point.x / maxX * 100}% - 10px)`,
+                                            ...calculateLineProperties(
+                                                point.x / maxX * 100,
+                                                point.y / maxY * 100,
+                                                line[i + 1].x / maxX * 100,
+                                                line[i + 1].y / maxY * 100,
+                                                width - 300,
+                                                height - 300,
+                                                20
+                                            )
+                                        }}
+                                    >line</div>)}
+                                </>
+                            )
+                        )}
+                    </div>)
+                )}
+            </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
