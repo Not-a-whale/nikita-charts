@@ -1,4 +1,4 @@
-import {RawData} from "@/shared/types/types";
+/*import {RawData} from "@/shared/types/types";
 import {findMaxCoordinateValue} from "@/utils/find-max-coordinate-value";
 
 export const getIntervalLabels = (polyLines: RawData, numLines: number) => {
@@ -22,3 +22,4 @@ export const getIntervalLabels = (polyLines: RawData, numLines: number) => {
 
     return {xLabels, yLabels};
 }
+*/

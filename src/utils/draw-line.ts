@@ -1,6 +1,18 @@
-import {Context} from "@/shared/types/types";
+/*import {Context} from "@/shared/types/types";
 import {LineSegment, Point} from "@/shared/classes/class";
 import {config} from "@/shared/constants/config";
+
+export const drawLine1 = (ctx: Context) => {
+    let [color, width] = ['', 0];
+    color = config.COLOR_LINE_NORMAL;
+    width = config.STROKE_SIZE_NORMAL;
+    ctx.lineWidth = width
+    ctx.strokeStyle = color
+    ctx.beginPath()
+    ctx.moveTo(150, 800-150)
+    ctx.lineTo(150+200, 800-200)
+    ctx.stroke()
+}
 
 export const drawLine = (ctx: Context,
                   line: LineSegment,
@@ -35,3 +47,4 @@ export const drawLineCustom = (
     ctx.lineTo(end.x, end.y)
     ctx.stroke()
 }
+*/
