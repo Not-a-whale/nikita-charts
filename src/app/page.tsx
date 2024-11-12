@@ -12,13 +12,12 @@ import {GraphCache} from "@/shared/classes/class";
 import {Tooltip} from "@/app/components/Tooltip/Tooltip";
 import {LineSwitchTooltip} from "@/app/components/Tooltip/content/LineSwitchTooltip";
 import {setGraphHighlighted} from "@/utils/setGraphHighlighted";
-import {drawInteractionLayer} from "@/utils/drawInteractionLayer";
 
-const handleInteraction = (e: React.MouseEvent<Element, MouseEvent>): GraphCache[] | null => {
+const handleInteraction = (e: React.MouseEvent<Element, MouseEvent>): GraphCache[] => {
     const rect = (e.target as Element).getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    return updateInteractions(x, y, e.clientX, e.clientY);
+    return updateInteractions(x, y);
 }
 
 
@@ -35,22 +34,25 @@ export default function Home() {
     }
 
     const onMouseMove = (e: React.MouseEvent<Element, MouseEvent>): void => {
-        handleInteraction(e);
+        const intersectedLines = handleInteraction(e);
+        setInteractionLines(intersectedLines || []);
+
+        if (intersectedLines.length > 1) {
+            setInteractionPointCoordinates({x: e.clientX, y: e.clientY});
+        } else {
+            removeTooltip();
+        }
     }
 
     const removeTooltip = () => {
         setInteractionPointCoordinates({x: -9999999, y: -9999999});
-        setGraphHighlighted(-1);
-        drawInteractionLayer();
     }
 
-    const onClick = (e: React.MouseEvent<Element, MouseEvent>): void => {
-        const interactionPoints = handleInteraction(e);
-        if (interactionPoints) {
-            setInteractionPointCoordinates({x: e.clientX, y: e.clientY});
-            setInteractionLines(interactionPoints);
+    const onClick = (): void => {
+        if (interactionLines !== null && interactionLines.length === 1) {
+            setGraphHighlighted(interactionLines[0].id);
         } else {
-            removeTooltip();
+            setGraphHighlighted(-1);
         }
     }
 
