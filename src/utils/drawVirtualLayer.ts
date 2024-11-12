@@ -1,6 +1,5 @@
 import {graphConfig} from "@/shared/constants/graphConfig";
-import {realToLocalX, realToLocalY} from "@/utils/realToLocalDataConverter";
-import { GraphCache } from "@/shared/classes/class";
+import {realToLocalY} from "@/utils/realToLocalDataConverter";
 
 export const drawVirtualLayer = ()  => {
     const ctx = graphConfig.baseCtx;
