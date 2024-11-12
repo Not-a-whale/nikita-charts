@@ -4,6 +4,7 @@ import {realToLocalX, realToLocalY} from "@/utils/realToLocalDataConverter";
 import { GraphCache } from "@/shared/classes/class";
 
 export const updateGraphConfig = (input: number[][][], staticCtx : CanvasRenderingContext2D, interactionCtx : CanvasRenderingContext2D)  => {
+    graphConfig.baseCtx = staticCtx;
     graphConfig.interactionCtx = interactionCtx;
     input.flat().forEach(point => {
         updateLimits(graphConfig.dataLimit.x, point[0]);
@@ -30,6 +31,10 @@ export const updateGraphConfig = (input: number[][][], staticCtx : CanvasRenderi
 
     graphConfig.factorPxToVal.x = calculatePxToValFactor(graphConfig.dataLimit.x, graphConfig.drawRectPx.width);
     graphConfig.factorPxToVal.y = calculatePxToValFactor(graphConfig.dataLimit.y, graphConfig.drawRectPx.height);
+
+    // shifting zero point of the axis from the left bottom corner
+    graphConfig.drawAreaZeroPoint.x = graphConfig.dataLimit.x.min >= 0 ? graphConfig.drawRectPx.left : graphConfig.drawRectPx.left - graphConfig.dataLimit.x.min/graphConfig.factorPxToVal.x;
+    graphConfig.drawAreaZeroPoint.y = graphConfig.dataLimit.y.min >= 0 ? graphConfig.drawRectPx.bottom : graphConfig.drawRectPx.bottom + graphConfig.dataLimit.y.min/graphConfig.factorPxToVal.y;
 
     exampleData.forEach((graph, index) => {
         const cGraph : number[][] = [];
@@ -70,7 +75,8 @@ export const updateGraphConfig = (input: number[][][], staticCtx : CanvasRenderi
     }
     function fillLabels(axis : {min : number, max:number, labelPaddingFactor:number}, maxCount:number, labels : number[]){
         const labelPeriod = getNiceLookingPeriod(axis, maxCount);
-        let currPos = Math.trunc(axis.min/labelPeriod + 1)*labelPeriod;
+        const add = axis.min >= 0 ? 1 : 0;
+        let currPos = Math.trunc(axis.min/labelPeriod + add)*labelPeriod;
         while (currPos <= axis.max){
             labels.push(currPos);
             currPos += labelPeriod;

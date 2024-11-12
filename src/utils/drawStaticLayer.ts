@@ -2,7 +2,8 @@ import {graphConfig} from "@/shared/constants/graphConfig";
 import {realToLocalX, realToLocalY} from "@/utils/realToLocalDataConverter";
 
 
-export const drawStaticLayer = (ctx : CanvasRenderingContext2D)  => {
+export const drawStaticLayer = ()  => {
+    const ctx = graphConfig.baseCtx;
     ctx.beginPath();
     ctx.strokeStyle =  graphConfig.interfaceColor;
     ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);

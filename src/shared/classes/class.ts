@@ -10,6 +10,7 @@ export class GraphCache{
     color : string;
     interactionPointIndex: number = -1;
     interactionSegmentEndIndex: number = -1;
+    isHighlighted : boolean = false;
     
     constructor(id: number, points: number[][]) {
         GraphCache.counter++;
@@ -39,11 +40,13 @@ export class GraphCache{
 
             const y1 = allPoints[index-1][1];
             const y2 = point[1];
-            return (Math.abs((x-x1)*(y2-y1)-(y-y1)*(x2-x1)) <= 500);  
+            return (x >= x1) && (x <= x2) && 
+                    ((y >= y1) && (y <= y2) || (y >= y2) && (y <= y1)) && 
+                    (Math.abs((x-x1)*(y2-y1)-(y-y1)*(x2-x1)) <= 500);  
         }
     }
 
     setHighestOrder(){
-        this.order = GraphCache.counter++;
+        this.order = GraphCache.counter++;            
     }
 }

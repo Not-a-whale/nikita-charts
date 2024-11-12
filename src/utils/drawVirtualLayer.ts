@@ -2,37 +2,39 @@ import {graphConfig} from "@/shared/constants/graphConfig";
 import {realToLocalX, realToLocalY} from "@/utils/realToLocalDataConverter";
 import { GraphCache } from "@/shared/classes/class";
 
-export const drawVirtualLayer = (ctx : CanvasRenderingContext2D)  => {
+export const drawVirtualLayer = ()  => {
+    const ctx = graphConfig.baseCtx;
     ctx.clearRect(graphConfig.drawRectPx.left+1, graphConfig.drawAreaRightTopPadding+1, graphConfig.drawRectPx.width-2, graphConfig.drawRectPx.height-2);
+    // horizontal lines
     graphConfig.labels.y.forEach(label => {
         ctx.beginPath();
         ctx.strokeStyle =  graphConfig.interfaceColor;
-        let x = graphConfig.drawRectPx.left;
-        let y = realToLocalY(label);
+        const x = graphConfig.drawRectPx.left;
+        const y = realToLocalY(label);
         ctx.moveTo(x, y);
         ctx.lineTo(x + graphConfig.drawRectPx.width, y)
         ctx.stroke();        
     })
 
+
+    // axis drawing
     ctx.lineWidth = 3;
     if (graphConfig.dataLimit.x.min < 0 && graphConfig.dataLimit.x.max > 0){
         ctx.beginPath();
         ctx.strokeStyle =  graphConfig.interfaceColor;
-        let x = realToLocalX(0);
-        ctx.moveTo(x, graphConfig.drawAreaRightTopPadding+1);
-        ctx.lineTo(x, graphConfig.drawRectPx.bottom-1);
+        ctx.moveTo(graphConfig.drawAreaZeroPoint.x, graphConfig.drawAreaRightTopPadding+1);
+        ctx.lineTo(graphConfig.drawAreaZeroPoint.x, graphConfig.drawRectPx.bottom-1);
         ctx.stroke();                        
     }
     if (graphConfig.dataLimit.y.min < 0 && graphConfig.dataLimit.y.max > 0){
         ctx.beginPath();
         ctx.strokeStyle =  graphConfig.interfaceColor;
-        let x = graphConfig.drawRectPx.left;
-        let y = realToLocalY(0);
-        ctx.moveTo(x+1, y);
-        ctx.lineTo(x+graphConfig.drawRectPx.width-2,y);
+        const x = graphConfig.drawRectPx.left;
+        ctx.moveTo(x+1, graphConfig.drawAreaZeroPoint.y);
+        ctx.lineTo(x+graphConfig.drawRectPx.width-2,graphConfig.drawAreaZeroPoint.y);
         ctx.stroke();                        
     }
-    ctx.lineWidth = 1;      
+    ctx.lineWidth = graphConfig.strokeSize.default;      
     
     graphConfig.localPointsCache.sort((a,b)=>a.order - b.order).forEach((graphCache) =>{
         const graph = graphCache.points;
