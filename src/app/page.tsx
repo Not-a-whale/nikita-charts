@@ -12,6 +12,7 @@ import {GraphCache} from "@/shared/classes/class";
 import {Tooltip} from "@/app/components/Tooltip/Tooltip";
 import {LineSwitchTooltip} from "@/app/components/Tooltip/content/LineSwitchTooltip";
 import {setGraphHighlighted} from "@/utils/setGraphHighlighted";
+import {drawInteractionLayer} from "@/utils/drawInteractionLayer";
 
 const handleInteraction = (e: React.MouseEvent<Element, MouseEvent>): GraphCache[] | null => {
     const rect = (e.target as Element).getBoundingClientRect();
@@ -37,15 +38,19 @@ export default function Home() {
         handleInteraction(e);
     }
 
+    const removeTooltip = () => {
+        setInteractionPointCoordinates({x: -9999999, y: -9999999});
+        setGraphHighlighted(-1);
+        drawInteractionLayer();
+    }
+
     const onClick = (e: React.MouseEvent<Element, MouseEvent>): void => {
         const interactionPoints = handleInteraction(e);
         if (interactionPoints) {
             setInteractionPointCoordinates({x: e.clientX, y: e.clientY});
             setInteractionLines(interactionPoints);
-            setGraphHighlighted(-1)
         } else {
-            setInteractionPointCoordinates({x: -9999999, y: -9999999});
-            setGraphHighlighted(-1)
+            removeTooltip();
         }
     }
 
@@ -69,7 +74,7 @@ export default function Home() {
             <canvas ref={canvasOverlayRef} width={graphConfig.size.width} height={graphConfig.size.height}
                     className={'canvas-item'} onMouseMove={onMouseMove} onClick={onClick}></canvas>
             <Tooltip style={{left: `${interactionPointCoordinates.x}px`, top: `${interactionPointCoordinates.y}px`}}>
-                <LineSwitchTooltip lines={interactionLines}/>
+                <LineSwitchTooltip lines={interactionLines} onClose={removeTooltip}/>
             </Tooltip>
         </div>
     );
